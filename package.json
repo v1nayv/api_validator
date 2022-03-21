@@ -1,0 +1,16 @@
+{
+  "name": "api_validator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "sway": "^2.0.6",
+    "typescript": "^4.6.2"
+  }
+}
