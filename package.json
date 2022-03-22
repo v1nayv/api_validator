@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^17.0.22",
+    "process": "^0.11.10",
     "sway": "^2.0.6",
     "typescript": "^4.6.2"
   }

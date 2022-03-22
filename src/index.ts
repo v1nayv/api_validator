@@ -35,12 +35,18 @@ const verbsInPathValidator: DocumentValidationFunction = (
   return result;
 };
 
+const args = process.argv;
+
 Sway.create({
-  definition: "http://localhost:3000/api/swagger.json",
+  definition: args[args.length - 1],
   customValidators: [verbsInPathValidator],
 }).then((apiDocumentation: Sway.SwaggerApi) => {
   const validationResults: ValidationResults = apiDocumentation.validate();
   validationResults.errors.forEach((errorObj) => {
-    console.log({ errorObj });
+    console.error({ errorObj });
   });
+
+  if (validationResults.errors.length || validationResults.warnings.length) {
+    process.exit(1);
+  }
 });
