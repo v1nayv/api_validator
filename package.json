@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "ncc build src/index.ts -o dist -m"
+    "build": "ncc build src/index.ts -o dist -m",
+    "watch": "ncc build src/index.ts -o dist -w"
   },
   "author": "",
   "license": "ISC",

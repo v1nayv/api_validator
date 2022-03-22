@@ -66363,57 +66363,6 @@ module.exports = ZSchema;
 
 /***/ }),
 
-/***/ 6144:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var sway_1 = __importDefault(__nccwpck_require__(14342));
-var ValidationCodes;
-(function (ValidationCodes) {
-    ValidationCodes["VERBS_USED"] = "VERBS_USED";
-})(ValidationCodes || (ValidationCodes = {}));
-var verbsInPathValidator = function (api) {
-    var entry = {
-        code: ValidationCodes.VERBS_USED,
-        message: "Avoid verbs in the path names.",
-        path: [],
-    };
-    var violatedWords = ["set", "create", "new", "delete", "remove"];
-    api.getPaths().forEach(function (value) {
-        violatedWords.forEach(function (word) {
-            if (value.path.includes(word)) {
-                entry.path.push(value.path);
-            }
-        });
-    });
-    var result = {
-        errors: entry.path.length ? [entry] : [],
-        warnings: [],
-    };
-    return result;
-};
-var args = process.argv;
-sway_1.default.create({
-    definition: args[args.length - 1],
-    customValidators: [verbsInPathValidator],
-}).then(function (apiDocumentation) {
-    var validationResults = apiDocumentation.validate();
-    validationResults.errors.forEach(function (errorObj) {
-        console.error({ errorObj: errorObj });
-    });
-    if (validationResults.errors.length || validationResults.warnings.length) {
-        process.exit(1);
-    }
-});
-
-
-/***/ }),
-
 /***/ 30132:
 /***/ ((module) => {
 
@@ -66654,6 +66603,17 @@ module.exports = JSON.parse('{"id":"http://json-schema.org/draft-04/schema#","$s
 /******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
 /******/ 		__nccwpck_require__.nmd = (module) => {
@@ -66668,12 +66628,93 @@ module.exports = JSON.parse('{"id":"http://json-schema.org/draft-04/schema#","$s
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(6144);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony import */ var sway__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(14342);
+
+var ValidationCodes;
+(function (ValidationCodes) {
+    ValidationCodes["VERBS_USED"] = "VERBS_USED";
+    ValidationCodes["CONSIDER_201_STATUS_CODE"] = "CONSIDER_201_STATUS_CODE";
+    ValidationCodes["CONSIDER_204_STATUS_CODE"] = "CONSIDER_204_STATUS_CODE";
+})(ValidationCodes || (ValidationCodes = {}));
+var apiValidator = function (api) {
+    var result = {
+        errors: [],
+        warnings: [],
+    };
+    api.getPaths().forEach(function (value) {
+        var verbValidationEntry = identifyPathWithVerbs(value.path);
+        if (verbValidationEntry) {
+            result.errors.push(verbValidationEntry);
+        }
+        var postStatusCodeValidations = identifyPostStatusCodes(value);
+        if (postStatusCodeValidations.length) {
+            result.errors.push(postStatusCodeValidations);
+        }
+    });
+    return result;
+};
+var identifyPostStatusCodes = function (path) {
+    var result = [];
+    path.getOperations().forEach(function (operation) {
+        if (operation.method == "post") {
+            var response = operation.getResponses().find(function (response) {
+                return response.statusCode === "200";
+            });
+            if (response) {
+                var postResponseCode = {
+                    code: ValidationCodes.CONSIDER_201_STATUS_CODE,
+                    message: "Consider using 201 status code for POST",
+                    path: [path.path, operation.method, response.statusCode],
+                };
+                result.push(postResponseCode);
+            }
+        }
+    });
+    return result;
+};
+var identifyPathWithVerbs = function (path) {
+    var violatedWords = [
+        "set",
+        "create",
+        "new",
+        "delete",
+        "remove",
+        "patch",
+        "update",
+    ];
+    var verbValidationEntry = {
+        code: ValidationCodes.VERBS_USED,
+        message: "Avoid verbs in the path names.",
+        path: [],
+    };
+    violatedWords.forEach(function (word) {
+        if (path.includes(word)) {
+            verbValidationEntry.path.push(path);
+        }
+    });
+    return verbValidationEntry.path.length ? verbValidationEntry : null;
+};
+var args = process.argv;
+sway__WEBPACK_IMPORTED_MODULE_0__.create({
+    definition: args.length === 3 ? args[2] : "http://localhost:3000/api/swagger.json",
+    customValidators: [apiValidator],
+}).then(function (apiDocumentation) {
+    var validationResults = apiDocumentation.validate();
+    validationResults.errors.forEach(function (errorObj) {
+        console.error(JSON.stringify(errorObj));
+    });
+    if (validationResults.errors.length || validationResults.warnings.length) {
+        process.exit(1);
+    }
+});
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
