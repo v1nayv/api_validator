@@ -5,12 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p ."
+    "build": "ncc build src/index.ts -o dist -m"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^17.0.22",
+    "@vercel/ncc": "^0.33.3",
     "process": "^0.11.10",
     "sway": "^2.0.6",
     "typescript": "^4.6.2"
